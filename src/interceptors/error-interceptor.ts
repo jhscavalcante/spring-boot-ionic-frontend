@@ -1,20 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable } from 'rxjs/Rx'; // IMPORTANTE: IMPORT ATUALIZADO
+import { StorageService } from '../services/storage.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+
+    constructor(public storage: StorageService ){        
+    }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         //console.log("Passou no interceptor");
         return next.handle(req)
         .catch((error, caught) => {
             
-            let errorObj = error; // ecebe o conteúdo do erro
+            let errorObj = error; // recebe o conteúdo do erro
 
             // se tiver o campo error no objeto (errorObj)
             if (errorObj.error) {
-                errorObj = errorObj.error; // recebe somente p conteúdo do campo error
+                errorObj = errorObj.error; // recebe somente o conteúdo do campo error
             }
 
             // verifica se não existe o campo status, caso existe ele não é um objeto JSON
@@ -25,28 +29,30 @@ export class ErrorInterceptor implements HttpInterceptor {
             console.log("Erro detectado pelo interceptor:");
             console.log(errorObj);
 
-            /*
             switch(errorObj.status) {
-                case 401:
-                this.handle401();
-                break;
+                //case 401:
+                //this.handle401();
+                //break;
 
                 case 403:
                 this.handle403();
                 break;
 
-                case 422:
-                this.handle422(errorObj);
-                break;
+                //case 422:
+                //this.handle422(errorObj);
+                //break;
 
-                default:
-                this.handleDefaultEror(errorObj);
-            }
-            */
+                //default:
+                //this.handleDefaultEror(errorObj);
+            }            
 
-            return Observable.throw(errorObj);
+            return Observable.throw(errorObj); // propaga o erro para o controlador que fez a requisição
 
         }) as any;
+    }
+
+    handle403(){
+        this.storage.setLocalUser(null); // inválida o localUser setando para nulo
     }
 }
 

@@ -32,7 +32,14 @@ export class ProfilePage {
                 this.cliente = response;
                 this.getImageIfExists(); // buscar imagem lá do bucket S3
             }, 
-            error => {});
+            error => {
+                if ( error.status == 403){
+                    this.navCtrl.setRoot('HomePage');
+                }
+            });
+      }else{
+          // redireciona também se houve erro na hora de pegar o localUser
+          this.navCtrl.setRoot('HomePage');
       }
   }
 
